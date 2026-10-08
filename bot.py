@@ -62,7 +62,7 @@ def callback_handler(call):
         send_word(call.message)
 
 
-# --- Вебсервер для Render (гарантує роботу 24/7) ---
+# --- Вебсервер для Render (тримає порт відкритим) ---
 app = Flask(__name__)
 
 
@@ -81,9 +81,14 @@ flask_thread = threading.Thread(target=run_flask)
 flask_thread.daemon = True
 flask_thread.start()
 
-# Запуск самого бота з автопідняттям у разі збоїв зв'язку
+# Запуск бота з примусовим видаленням вебхука та авторестартом
 if __name__ == "__main__":
     print("Бот і вебсервер успішно запущені!")
+    try:
+        bot.remove_webhook()  # Скидаємо старий вебхук, щоб полінг запрацював
+    except Exception as e:
+        print(f"Помилка при видаленні вебхука: {e}")
+
     while True:
         try:
             bot.infinity_polling(none_stop=True, interval=1, timeout=20, long_polling_timeout=20)
